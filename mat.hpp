@@ -6,5 +6,5 @@ using namespace std;
 
 
 namespace ariel{
-    string mat(int hight , int width , char symbol1 , char symbol2); 
+    string mat(int width ,int hight , char symbol1 , char symbol2); 
 }

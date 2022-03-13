@@ -281,7 +281,7 @@ TEST_CASE("Bad input")
 
 	for (int i = 0; i < 20; i += 2)
 	{
-		CHECK_THROWS(mat(i, 5, '$', '%'));
+		CHECK_THROWS(mat(i, i - 1, '$', '%'));
 		CHECK_THROWS(mat(9, i, '$', '%'));
 		CHECK_THROWS(mat(i, i + 8, '$', '%'));
 		CHECK_THROWS(mat(i + 1, i, '$', '%'));
@@ -292,7 +292,74 @@ TEST_CASE("Bad input")
 		for (int j = 0; j < 20; j++)
 			CHECK_THROWS(mat(i, j, '$', '%'));
 
-	for (int i = 0; i > 20; i--)
-		for (int j = 0; j < -20; j++)
+	for (int i = 0; i > -20; i--)
+		for (int j = 0; j < 20; j++)
+			CHECK_THROWS(mat(j, i, '$', '%'));
+
+	for (int i = 0; i > -20; i -= 2)
+		for (int j = 0; j < 20; j++)
 			CHECK_THROWS(mat(i, j, '$', '%'));
+
+	for (int i = 0; i > -20; i -= 2)
+		for (int j = 0; j < 20; j++)
+			CHECK_THROWS(mat(j, i, '$', '%'));
+
+	for (int i = 0; i > -20; i--)
+		for (int j = 0; j > -20; j--)
+			CHECK_THROWS(mat(i, j, '$', '%'));
+
+	for (int i = 0; i > -20; i -= 2)
+		for (int j = 0; j > -20; j -= 2)
+			CHECK_THROWS(mat(i, j, '$', '%'));
+
+	for (int i = 0; i > -20; i -= 2)
+		for (int j = 0; j > -20; j--)
+			CHECK_THROWS(mat(i, j, '$', '%'));
+
+	for (int i = 0; i > -20; i--)
+		for (int j = 0; j > -20; j -= 2)
+			CHECK_THROWS(mat(i, j, '$', '%'));
+}
+
+TEST_CASE("Bed letters")
+{
+
+	char a = '\0', b = '\0';
+	for (int i = -256; i < 256; i++)
+	{
+		if (i < 33 || 126 < i)
+		{
+			a = i;
+			CHECK_THROWS(mat(9, 7, a, b));
+		}
+	}
+	for (int i = -256; i < 256; i++)
+	{
+		if (i < 33 || 126 < i)
+		{
+			b = i;
+			CHECK_THROWS(mat(9, 7, a, b));
+		}
+	}
+	for (int i = -256; i < 256; i++)
+
+	{
+		if (i < 33 || 126 < i)
+		{
+			a = i;
+		}
+		for (int j = -256; j < 256; j++)
+		{
+			if (j < 33 || 126 < j)
+			{
+				b = j;
+				CHECK_THROWS(mat(8, 7, a, b));
+				CHECK_THROWS(mat(9, 8, a, b));
+				CHECK_THROWS(mat(2, 8, a, b));
+				CHECK_THROWS(mat(10, 2, a, b));
+
+
+			}
+		}
+	}
 }
