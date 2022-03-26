@@ -1,365 +1,80 @@
-/**
- * AUTHORS: <Barak Sharabi>
- *
- * Date: 2021-03
- */
-
-#include "doctest.h"
-#include "mat.hpp"
-using namespace ariel;
-
 #include <string>
-#include <algorithm>
+#include "doctest.h"
+#include "Notebook.hpp"
+#include "Direction.hpp"
+using namespace ariel;
 using namespace std;
-
-/**
- * Returns the input string without the whitespace characters: space, newline and tab.
- * Requires std=c++2a.
- */
-string nospaces(string input)
-{
-	std::erase(input, ' ');
-	std::erase(input, '\t');
-	std::erase(input, '\n');
-	std::erase(input, '\r');
-	return input;
-}
 
 TEST_CASE("Good input")
 {
-	CHECK(nospaces(mat(25, 7, '@', '-')) == nospaces("@@@@@@@@@@@@@@@@@@@@@@@@@\n"
-													 "@-----------------------@\n"
-													 "@-@@@@@@@@@@@@@@@@@@@@@-@\n"
-													 "@-@-------------------@-@\n"
-													 "@-@@@@@@@@@@@@@@@@@@@@@-@\n"
-													 "@-----------------------@\n"
-													 "@@@@@@@@@@@@@@@@@@@@@@@@@"));
+    Notebook notebook;
 
-	CHECK(nospaces(mat(31, 9, '#', '-')) == nospaces("###############################\n"
-													 "#-----------------------------#\n"
-													 "#-###########################-#\n"
-													 "#-#-------------------------#-#\n"
-													 "#-#-#######################-#-#\n"
-													 "#-#-------------------------#-#\n"
-													 "#-###########################-#\n"
-													 "#-----------------------------#\n"
-													 "###############################"));
+    // test for writing from the begining of the row/column horizontal&vertical
+    for (int i = 0; i < 10; i++)
+        notebook.write(i, 0, 0, Direction::Horizontal, to_string(i) + " row!");
 
-	CHECK(nospaces(mat(25, 7, '$', '-')) == nospaces("$$$$$$$$$$$$$$$$$$$$$$$$$\n"
-													 "$-----------------------$\n"
-													 "$-$$$$$$$$$$$$$$$$$$$$$-$\n"
-													 "$-$-------------------$-$\n"
-													 "$-$$$$$$$$$$$$$$$$$$$$$-$\n"
-													 "$-----------------------$\n"
-													 "$$$$$$$$$$$$$$$$$$$$$$$$$"));
+    for (int i = 10; i < 20; i++)
+        notebook.write(i, 0, 0, Direction::Vertical, to_string(i) + " column!");
 
-	CHECK(nospaces(mat(9, 5, 'b', '-')) == nospaces("bbbbbbbbb\n"
-													"b-------b\n"
-													"b-bbbbb-b\n"
-													"b-------b\n"
-													"bbbbbbbbb"));
+    // here we read what we wrote above
+    for (int i = 0; i < 10; i++)
+        CHECK(notebook.read(i, 0, 0, Direction::Horizontal, 6) == to_string(i) + " row!");
+    for (int i = 10; i < 20; i++)
+        CHECK(notebook.read(i, 0, 0, Direction::Vertical, 10) == to_string(i) + " column!");
 
-	CHECK(nospaces(mat(1, 31, '*', '-')) == nospaces("*\n"
-													 "*\n"
-													 "*\n"
-													 "*\n"
-													 "*\n"
-													 "*\n"
-													 "*\n"
-													 "*\n"
-													 "*\n"
-													 "*\n"
-													 "*\n"
-													 "*\n"
-													 "*\n"
-													 "*\n"
-													 "*\n"
-													 "*\n"
-													 "*\n"
-													 "*\n"
-													 "*\n"
-													 "*\n"
-													 "*\n"
-													 "*\n"
-													 "*\n"
-													 "*\n"
-													 "*\n"
-													 "*\n"
-													 "*\n"
-													 "*\n"
-													 "*\n"
-													 "*\n"
-													 "*"));
+    // trying to read from somewhere we didnt write anything
+    for (int i = 110; i < 116; i++)
+        CHECK(notebook.read(i, 0, 0, Direction::Horizontal, 10) == "__________");
 
-	CHECK(nospaces(mat(3, 21, '*', '-')) == nospaces("***\n"
-													 "*-*\n"
-													 "*-*\n"
-													 "*-*\n"
-													 "*-*\n"
-													 "*-*\n"
-													 "*-*\n"
-													 "*-*\n"
-													 "*-*\n"
-													 "*-*\n"
-													 "*-*\n"
-													 "*-*\n"
-													 "*-*\n"
-													 "*-*\n"
-													 "*-*\n"
-													 "*-*\n"
-													 "*-*\n"
-													 "*-*\n"
-													 "*-*\n"
-													 "*-*\n"
-													 "***"));
+    // test to erase what we wrote above horizontal&vertical
+    for (int i = 0; i < 10; i++)
+        notebook.erase(i, 0, 0, Direction::Horizontal, 2);
+    for (int i = 10; i < 20; i++)
+        notebook.erase(i, 0, 0, Direction::Vertical, 1);
 
-	CHECK(nospaces(mat(23, 29, 'a', '-')) == nospaces("aaaaaaaaaaaaaaaaaaaaaaa\n"
-													  "a---------------------a\n"
-													  "a-aaaaaaaaaaaaaaaaaaa-a\n"
-													  "a-a-----------------a-a\n"
-													  "a-a-aaaaaaaaaaaaaaa-a-a\n"
-													  "a-a-a-------------a-a-a\n"
-													  "a-a-a-aaaaaaaaaaa-a-a-a\n"
-													  "a-a-a-a---------a-a-a-a\n"
-													  "a-a-a-a-aaaaaaa-a-a-a-a\n"
-													  "a-a-a-a-a-----a-a-a-a-a\n"
-													  "a-a-a-a-a-aaa-a-a-a-a-a\n"
-													  "a-a-a-a-a-a-a-a-a-a-a-a\n"
-													  "a-a-a-a-a-a-a-a-a-a-a-a\n"
-													  "a-a-a-a-a-a-a-a-a-a-a-a\n"
-													  "a-a-a-a-a-a-a-a-a-a-a-a\n"
-													  "a-a-a-a-a-a-a-a-a-a-a-a\n"
-													  "a-a-a-a-a-a-a-a-a-a-a-a\n"
-													  "a-a-a-a-a-a-a-a-a-a-a-a\n"
-													  "a-a-a-a-a-aaa-a-a-a-a-a\n"
-													  "a-a-a-a-a-----a-a-a-a-a\n"
-													  "a-a-a-a-aaaaaaa-a-a-a-a\n"
-													  "a-a-a-a---------a-a-a-a\n"
-													  "a-a-a-aaaaaaaaaaa-a-a-a\n"
-													  "a-a-a-------------a-a-a\n"
-													  "a-a-aaaaaaaaaaaaaaa-a-a\n"
-													  "a-a-----------------a-a\n"
-													  "a-aaaaaaaaaaaaaaaaaaa-a\n"
-													  "a---------------------a\n"
-													  "aaaaaaaaaaaaaaaaaaaaaaa"));
-
-	CHECK(nospaces(mat(7, 9, '!', '-')) == nospaces("!!!!!!!\n"
-													"!-----!\n"
-													"!-!!!-!\n"
-													"!-!-!-!\n"
-													"!-!-!-!\n"
-													"!-!-!-!\n"
-													"!-!!!-!\n"
-													"!-----!\n"
-													"!!!!!!!"));
-
-	CHECK(nospaces(mat(3, 41, '^', '-')) == nospaces("^^^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^-^\n"
-													 "^^^"));
-
-	CHECK(nospaces(mat(1, 5, '&', '-')) == nospaces("&\n"
-													"&\n"
-													"&\n"
-													"&\n"
-													"&"));
-
-	CHECK(nospaces(mat(1, 1, 'm', '-')) == nospaces("m"));
-
-	CHECK(nospaces(mat(9, 7, '@', '-')) == nospaces("@@@@@@@@@\n"
-													"@-------@\n"
-													"@-@@@@@-@\n"
-													"@-@---@-@\n"
-													"@-@@@@@-@\n"
-													"@-------@\n"
-													"@@@@@@@@@"));
-
-	CHECK(nospaces(mat(7, 5, '@', '-')) == nospaces("@@@@@@@\n"
-													"@-----@\n"
-													"@-@@@-@\n"
-													"@-----@\n"
-													"@@@@@@@"));
-
-	CHECK(nospaces(mat(7, 7, '@', '-')) == nospaces("@@@@@@@\n"
-													"@-----@\n"
-													"@-@@@-@\n"
-													"@-@-@-@\n"
-													"@-@@@-@\n"
-													"@-----@\n"
-													"@@@@@@@"));
-
-	CHECK(nospaces(mat(3, 5, '@', '-')) == nospaces("@@@\n"
-													"@-@\n"
-													"@-@\n"
-													"@-@\n"
-													"@@@"));
-
-	CHECK(nospaces(mat(5, 7, '@', '-')) == nospaces("@@@@@\n"
-													"@---@\n"
-													"@-@-@\n"
-													"@-@-@\n"
-													"@-@-@\n"
-													"@---@\n"
-													"@@@@@"));
-
-	CHECK(nospaces(mat(13, 5, '@', '-')) == nospaces("@@@@@@@@@@@@@\n"
-													 "@-----------@\n"
-													 "@-@@@@@@@@@-@\n"
-													 "@-----------@\n"
-													 "@@@@@@@@@@@@@"));
-
-	CHECK(nospaces(mat(5, 13, '@', '-')) == nospaces("@@@@@\n"
-													 "@---@\n"
-													 "@-@-@\n"
-													 "@-@-@\n"
-													 "@-@-@\n"
-													 "@-@-@\n"
-													 "@-@-@\n"
-													 "@-@-@\n"
-													 "@-@-@\n"
-													 "@-@-@\n"
-													 "@-@-@\n"
-													 "@---@\n"
-													 "@@@@@"));
-
-	CHECK(nospaces(mat(11, 15, '@', '-')) == nospaces("@@@@@@@@@@@\n"
-													  "@---------@\n"
-													  "@-@@@@@@@-@\n"
-													  "@-@-----@-@\n"
-													  "@-@-@@@-@-@\n"
-													  "@-@-@-@-@-@\n"
-													  "@-@-@-@-@-@\n"
-													  "@-@-@-@-@-@\n"
-													  "@-@-@-@-@-@\n"
-													  "@-@-@-@-@-@\n"
-													  "@-@-@@@-@-@\n"
-													  "@-@-----@-@\n"
-													  "@-@@@@@@@-@\n"
-													  "@---------@\n"
-													  "@@@@@@@@@@@\n"));
+    // chacking if its actually removed
+    for (int i = 0; i < 10; i++)
+        CHECK(notebook.read(i, 0, 0, Direction::Horizontal, 2) == "~~");
+    for (int i = 10; i < 20; i++)
+        CHECK(notebook.read(i, 0, 0, Direction::Vertical, 1) == "~");
 }
 
-TEST_CASE("Bad input")
+TEST_CASE("Bad input ")
 {
+    Notebook notebook;
 
-	for (int i = 0; i < 20; i += 2)
-	{
-		CHECK_THROWS(mat(i, i - 1, '$', '%'));
-		CHECK_THROWS(mat(9, i, '$', '%'));
-		CHECK_THROWS(mat(i, i + 8, '$', '%'));
-		CHECK_THROWS(mat(i + 1, i, '$', '%'));
-		CHECK_THROWS(mat(10, i, '$', '%'));
-	}
+    // invalid page&rows&colunms&length numbers inputs, negetive numbers
+    for (int i = -10; i < 0; i++)
+    {
+        CHECK_THROWS(notebook.read(i, 0, 0, Direction::Horizontal, i * -1));
+        CHECK_THROWS(notebook.read(i, 0, 0, Direction::Horizontal, i ));
+        CHECK_THROWS(notebook.read(i, i, 0, Direction::Horizontal, i ));
+        CHECK_THROWS(notebook.read(i, i, i, Direction::Horizontal, i ));
+        CHECK_THROWS(notebook.read(i, 0, i, Direction::Horizontal, i ));
+        CHECK_THROWS(notebook.read(i, i, 0, Direction::Horizontal, i ));
+        CHECK_THROWS(notebook.read(i, 0, 0, Direction::Vertical, i * -1));
+        CHECK_THROWS(notebook.read(i, 0, 0, Direction::Vertical, i ));
+        CHECK_THROWS(notebook.read(i, i, 0, Direction::Vertical, i ));
+        CHECK_THROWS(notebook.read(i, i, i, Direction::Vertical, i ));
+        CHECK_THROWS(notebook.read(i, 0, i, Direction::Vertical, i ));
+        CHECK_THROWS(notebook.read(i, i, 0, Direction::Vertical, i ));
+    }
 
-	for (int i = 0; i > -20; i--)
-		for (int j = 0; j < 20; j++)
-			CHECK_THROWS(mat(i, j, '$', '%'));
+    // write more then 100 char to a row from 0 and 99 column
+    CHECK_THROWS(notebook.write(1, 0, 0, Direction::Horizontal, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
+    CHECK_THROWS(notebook.write(1, 0, 99, Direction::Horizontal, "#$$%^^^^%^%^$%$^%&%"));
 
-	for (int i = 0; i > -20; i--)
-		for (int j = 0; j < 20; j++)
-			CHECK_THROWS(mat(j, i, '$', '%'));
+    // check if possible to write more then 100 chars to column
+    CHECK_NOTHROW(notebook.write(2, 0, 0, Direction::Vertical, "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2"));
 
-	for (int i = 0; i > -20; i -= 2)
-		for (int j = 0; j < 20; j++)
-			CHECK_THROWS(mat(i, j, '$', '%'));
+    notebook.write(0, 0, 0, Direction::Horizontal, "Check the erase function");
+    notebook.erase(0, 0, 0, Direction::Horizontal, 20);
+    CHECK_THROWS(notebook.write(0, 0, 0, Direction::Horizontal, "Check the erase function"));
 
-	for (int i = 0; i > -20; i -= 2)
-		for (int j = 0; j < 20; j++)
-			CHECK_THROWS(mat(j, i, '$', '%'));
-
-	for (int i = 0; i > -20; i--)
-		for (int j = 0; j > -20; j--)
-			CHECK_THROWS(mat(i, j, '$', '%'));
-
-	for (int i = 0; i > -20; i -= 2)
-		for (int j = 0; j > -20; j -= 2)
-			CHECK_THROWS(mat(i, j, '$', '%'));
-
-	for (int i = 0; i > -20; i -= 2)
-		for (int j = 0; j > -20; j--)
-			CHECK_THROWS(mat(i, j, '$', '%'));
-
-	for (int i = 0; i > -20; i--)
-		for (int j = 0; j > -20; j -= 2)
-			CHECK_THROWS(mat(i, j, '$', '%'));
+    // check for invalid input for column over 100 and length of row over 100
+    CHECK_THROWS(notebook.read(0, 0, 120, Direction::Horizontal, 10));
+    CHECK_THROWS(notebook.erase(0, 0, 120, Direction::Horizontal, 10));
+    CHECK_THROWS(notebook.erase(0, 0, 0, Direction::Horizontal, 150));
+    CHECK_THROWS(notebook.read(0, 0, 0, Direction::Horizontal, 150));
 }
 
-TEST_CASE("Bed letters")
-{
-
-	char a = '\0', b = '\0';
-	for (int i = -256; i < 256; i++)
-	{
-		if (i < 33 || 126 < i)
-		{
-			a = i;
-			CHECK_THROWS(mat(9, 7, a, b));
-		}
-	}
-	for (int i = -256; i < 256; i++)
-	{
-		if (i < 33 || 126 < i)
-		{
-			b = i;
-			CHECK_THROWS(mat(9, 7, a, b));
-		}
-	}
-	for (int i = -256; i < 256; i++)
-
-	{
-		if (i < 33 || 126 < i)
-		{
-			a = i;
-		}
-		for (int j = -256; j < 256; j++)
-		{
-			if (j < 33 || 126 < j)
-			{
-				b = j;
-				CHECK_THROWS(mat(8, 7, a, b));
-				CHECK_THROWS(mat(9, 8, a, b));
-				CHECK_THROWS(mat(2, 8, a, b));
-				CHECK_THROWS(mat(10, 2, a, b));
-
-
-			}
-		}
-	}
-}
