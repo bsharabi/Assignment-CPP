@@ -9,10 +9,10 @@ TEST_CASE("Good input")
 {
     Notebook notebook;
 
-    // test for writing from the begining of the row/column horizontal&vertical
+    // test for writing from the begining of the row horizontal
     for (int i = 0; i < 10; i++)
         notebook.write(i, 0, 0, Direction::Horizontal, to_string(i) + " row!");
-
+    // test for writing from the begining of the  column vertical
     for (int i = 10; i < 20; i++)
         notebook.write(i, 0, 0, Direction::Vertical, to_string(i) + " column!");
 
