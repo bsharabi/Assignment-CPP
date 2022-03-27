@@ -1,6 +1,5 @@
-# Solution
 solution*
-*.o
+
 # Prerequisites
 *.d
 
@@ -35,3 +34,6 @@ solution*
 *.app
 demo
 test
+
+# vsCode config files
+**/.vscode
