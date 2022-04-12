@@ -1,80 +1,75 @@
-#include <string>
 #include "doctest.h"
-#include "Notebook.hpp"
-#include "Direction.hpp"
-using namespace ariel;
+#include "Matrix.hpp"
+#include <iostream>
+#include <vector>
+
+using namespace zich;
 using namespace std;
 
-TEST_CASE("Good input")
+TEST_CASE("Good inputs")
 {
-    Notebook notebook;
-
-    // test for writing from the begining of the row/column horizontal&vertical
-    for (int i = 0; i < 10; i++)
-        notebook.write(i, 0, 0, Direction::Horizontal, to_string(i) + " row!");
-
-    for (int i = 10; i < 20; i++)
-        notebook.write(i, 0, 0, Direction::Vertical, to_string(i) + " column!");
-
-    // here we read what we wrote above
-    for (int i = 0; i < 10; i++)
-        CHECK(notebook.read(i, 0, 0, Direction::Horizontal, 6) == to_string(i) + " row!");
-    for (int i = 10; i < 20; i++)
-        CHECK(notebook.read(i, 0, 0, Direction::Vertical, 10) == to_string(i) + " column!");
-
-    // trying to read from somewhere we didnt write anything
-    for (int i = 110; i < 116; i++)
-        CHECK(notebook.read(i, 0, 0, Direction::Horizontal, 10) == "__________");
-
-    // test to erase what we wrote above horizontal&vertical
-    for (int i = 0; i < 10; i++)
-        notebook.erase(i, 0, 0, Direction::Horizontal, 2);
-    for (int i = 10; i < 20; i++)
-        notebook.erase(i, 0, 0, Direction::Vertical, 1);
-
-    // chacking if its actually removed
-    for (int i = 0; i < 10; i++)
-        CHECK(notebook.read(i, 0, 0, Direction::Horizontal, 2) == "~~");
-    for (int i = 10; i < 20; i++)
-        CHECK(notebook.read(i, 0, 0, Direction::Vertical, 1) == "~");
-}
-
-TEST_CASE("Bad input ")
-{
-    Notebook notebook;
-
-    // invalid page&rows&colunms&length numbers inputs, negetive numbers
-    for (int i = -10; i < 0; i++)
+    SUBCASE("Operator check not throw")
     {
-        CHECK_THROWS(notebook.read(i, 0, 0, Direction::Horizontal, i * -1));
-        CHECK_THROWS(notebook.read(i, 0, 0, Direction::Horizontal, i ));
-        CHECK_THROWS(notebook.read(i, i, 0, Direction::Horizontal, i ));
-        CHECK_THROWS(notebook.read(i, i, i, Direction::Horizontal, i ));
-        CHECK_THROWS(notebook.read(i, 0, i, Direction::Horizontal, i ));
-        CHECK_THROWS(notebook.read(i, i, 0, Direction::Horizontal, i ));
-        CHECK_THROWS(notebook.read(i, 0, 0, Direction::Vertical, i * -1));
-        CHECK_THROWS(notebook.read(i, 0, 0, Direction::Vertical, i ));
-        CHECK_THROWS(notebook.read(i, i, 0, Direction::Vertical, i ));
-        CHECK_THROWS(notebook.read(i, i, i, Direction::Vertical, i ));
-        CHECK_THROWS(notebook.read(i, 0, i, Direction::Vertical, i ));
-        CHECK_THROWS(notebook.read(i, i, 0, Direction::Vertical, i ));
+        vector<double> a = {2, 2, 2, 1, 1, 1, 3, 3, 3};
+        Matrix mat1(a, 3, 3);
+        vector<double> b = {1, 1, 1, 1, 1, 1, 1, 1, 1};
+        Matrix mat2(b, 3, 3);
+        bool ans;
+        CHECK_NOTHROW(mat1 + mat2);
+        CHECK_NOTHROW(mat1 - mat2);
+        CHECK_NOTHROW(mat1 * mat2);
+        CHECK_NOTHROW(mat1 += mat2);
+        CHECK_NOTHROW(mat1 -= mat2);
+        CHECK_NOTHROW(mat1 *= mat2);
+        CHECK_NOTHROW(ans = mat1 == mat2);
+        CHECK_NOTHROW(ans = mat1 != mat2);
+        CHECK_NOTHROW(ans = mat1 > mat2);
+        CHECK_NOTHROW(ans = mat1 < mat2);
+        CHECK_NOTHROW(ans = mat1 <= mat2);
+        CHECK_NOTHROW(ans = mat1 >= mat2);
     }
 
-    // write more then 100 char to a row from 0 and 99 column
-    CHECK_THROWS(notebook.write(1, 0, 0, Direction::Horizontal, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
-    CHECK_THROWS(notebook.write(1, 0, 99, Direction::Horizontal, "#$$%^^^^%^%^$%$^%&%"));
+    SUBCASE("Operators correc")
+    {
+        vector<double> a = {2, 2, 2, 2, 2, 2, 2, 2, 2};
+        Matrix mat1(a, 3, 3);
+        vector<double> b = {1, 1, 1, 1, 1, 1, 1, 1, 1};
+        Matrix mat2(b, 3, 3);
 
-    // check if possible to write more then 100 chars to column
-    CHECK_NOTHROW(notebook.write(2, 0, 0, Direction::Vertical, "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2"));
-
-    notebook.write(0, 0, 0, Direction::Horizontal, "Check the erase function");
-    notebook.erase(0, 0, 0, Direction::Horizontal, 20);
-    CHECK_THROWS(notebook.write(0, 0, 0, Direction::Horizontal, "Check the erase function"));
-
-    // check for invalid input for column over 100 and length of row over 100
-    CHECK_THROWS(notebook.read(0, 0, 120, Direction::Horizontal, 10));
-    CHECK_THROWS(notebook.erase(0, 0, 120, Direction::Horizontal, 10));
-    CHECK_THROWS(notebook.erase(0, 0, 0, Direction::Horizontal, 150));
-    CHECK_THROWS(notebook.read(0, 0, 0, Direction::Horizontal, 150));
+        CHECK(mat1 >= mat2);
+        CHECK(mat2 <= mat1);
+        CHECK(mat1 != mat2);
+        CHECK(mat1 == ++mat2);
+        CHECK(mat1++ != mat2);
+        mat1 *= 3;
+        mat2 *= 3;
+        CHECK(mat1 == mat2);
+        CHECK(mat1 * 3 == 3 * mat2);
+        CHECK(mat1 + mat2 == mat2 + mat1);
+        CHECK(mat1 - mat2 == mat2 - mat1);
+    }
 }
 
+TEST_CASE("Bad inputs")
+{
+    SUBCASE("invalid Matrix size")
+    {
+        vector<double> a = {2, 2, 2, 1, 1, 1, 3, 3, 3};
+        Matrix mat1(a, 3, 3);
+        vector<double> b = {2, 2, 2, 1, 1, 1, 3, 3, 3, 4, 4, 4};
+        Matrix mat2(b, 4, 3);
+        bool ans;
+        CHECK_THROWS(mat1 + mat2);
+        CHECK_THROWS(mat1 += mat2);
+        CHECK_THROWS(mat1 -= mat2);
+        CHECK_THROWS(mat1 * mat2);
+        CHECK_THROWS(ans = mat1 <= mat2);
+        CHECK_THROWS(ans = mat1 < mat2);
+        CHECK_THROWS(ans = mat1 == mat2);
+        CHECK_THROWS(mat1 - mat2);
+        CHECK_THROWS(ans = mat1 != mat2);
+        CHECK_THROWS(ans = mat1 > mat2);
+        CHECK_THROWS(ans = mat1 >= mat2);
+        CHECK_THROWS(mat1 *= mat2);
+    }
+}
